@@ -11,6 +11,7 @@ public class ChatMessage {
     private String messageUser;
     private long messageTime;
 
+    //used creator
     public ChatMessage(String messageText, String messageUser) {
         this.messageText = messageText;
         this.messageUser = messageUser;
@@ -19,10 +20,11 @@ public class ChatMessage {
     }
 
 
-
+    //default creator(don't delete; it is needed for Firebase)
     public ChatMessage() {
     }
 
+    //all the setters and getters
     public String getMessageText() {
         return messageText;
     }

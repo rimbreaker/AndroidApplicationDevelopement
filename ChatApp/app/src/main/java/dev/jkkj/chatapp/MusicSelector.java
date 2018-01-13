@@ -39,12 +39,12 @@ public class MusicSelector extends AppCompatActivity{
 
     ArrayAdapter<String> adapter;
 
-
+    //checking permission at the beginning of the View
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.selector_list);
-
+        //checking if there is permission to search through the files
         if(ContextCompat.checkSelfPermission(MusicSelector.this,
                 android.Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
             if(ActivityCompat.shouldShowRequestPermissionRationale(MusicSelector.this,
@@ -56,17 +56,22 @@ public class MusicSelector extends AppCompatActivity{
                         new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},MY_PERMISSION_REQUEST);
             }
         }else{
+            //see below
             doStuff();
         }
     }
 
+    //populating ListView with file list and uploading file info to the database on click
     public void doStuff(){
         listView2=(ListView)findViewById(R.id.listView2);
         arrayList = new ArrayList<>();
         editText=(EditText) findViewById(R.id.txtsearch);
+        //see below
         getMusic();
+        //populating the ListView with the songs
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,arrayList);
         listView2.setAdapter(adapter);
+        //interactions for the search engine
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -89,6 +94,7 @@ public class MusicSelector extends AppCompatActivity{
 
             }
         });
+        //reacting to songs being clicked
         listView2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -98,11 +104,14 @@ public class MusicSelector extends AppCompatActivity{
         });
     }
 
+    //getting all music files from the device
     public void getMusic(){
+        //using the method from the internet
         ContentResolver contentResolver = getContentResolver();
         Uri songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         Cursor songCursor = contentResolver.query(songUri, null,null,null,null);
 
+        //adding every song title and song artist to the arrayList
         if(songCursor != null && songCursor.moveToFirst()){
             int songTitle = songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
             int songArtist = songCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
@@ -113,9 +122,11 @@ public class MusicSelector extends AppCompatActivity{
                 arrayList.add(currentTitle + "\n" + currentArtist );
             }while(songCursor.moveToNext());
         }
+        //populating the array that is later used for search engine
         toSearch=arrayList.toArray(new String[0]);
     }
 
+    //work of search-bar
     public void searchItem(String txtToSearch){
         for(String item:toSearch){
             if(!item.contains(txtToSearch)){
@@ -124,6 +135,8 @@ public class MusicSelector extends AppCompatActivity{
         }
         adapter.notifyDataSetChanged();
     }
+
+    //reacting for granting permission
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch(requestCode){

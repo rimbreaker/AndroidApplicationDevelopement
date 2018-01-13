@@ -3,20 +3,16 @@ package dev.jkkj.chatapp;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.text.format.DateFormat;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -27,7 +23,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -38,17 +33,17 @@ public class MainActivity extends AppCompatActivity {
     private static int SIGN_IN_REQUEST_CODE = 1;
     private FirebaseListAdapter<ChatMessage> adapter;
     RelativeLayout activity_main;
-    //FloatingActionButton fab;
-   // Intent intent2 = new Intent(this, SongOptions.class);
     Context sth=this;
 
 
-
+    //action for 'Search File' button
     public void searchFile(View view){
+        //opening different activity
         Intent intent = new Intent(this, MusicSelector.class);
         startActivity(intent);
     }
 
+    //signing out; entirely from tutorial
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId()==R.id.menu_sign_out)
@@ -64,12 +59,14 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    //entirely from tutorial
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.main_menu,menu);
         return true;
     }
 
+    //handling signing in; entirely from tutorial
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode,resultCode,data);
@@ -88,22 +85,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //starting MainActivity;from tutorial, but deleted editText field and floating button
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         activity_main=(RelativeLayout)findViewById(R.id.activity_main);
-       // fab=(FloatingActionButton)findViewById(R.id.fab);
-        /*fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                EditText input = (EditText)findViewById(R.id.input);
-                FirebaseDatabase.getInstance().getReference().push().setValue(new ChatMessage(input.getText().toString(),FirebaseAuth.getInstance().getCurrentUser().getEmail()));
-                input.setText("");
-            }
-        });*/
-        //Check if not sign-in then  navigate Sign-in page
+
         if(FirebaseAuth.getInstance().getCurrentUser()==null)
         {
             startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder().build(),SIGN_IN_REQUEST_CODE);
@@ -118,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    //displaying messages from database in real-time
     private void displayChatMessage() {
         final ArrayList<String> songs=new ArrayList<>();
         final ArrayList<String> users=new ArrayList<>();
@@ -132,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 messageUser=(TextView) v.findViewById(R.id.message_user);
                 messageTime=(TextView) v.findViewById(R.id.message_time);
 
-                if(!model.getMessageUser().equals("PLAY")) {
+                if(!model.getMessageUser().contains("PLAY")) {
 
                     messageText.setText(model.getMessageText());
                     songs.add(model.getMessageText());

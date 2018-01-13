@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context="dev.jkkj.chatapp.SongOptions">
 
+    <!--song title and artist-->
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
@@ -16,6 +17,7 @@
         app:layout_constraintBottom_toTopOf="@+id/synchButton"
         app:layout_constraintLeft_toLeftOf="parent" />
 
+    <!--name of sender-->
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
@@ -27,6 +29,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textView" />
 
+    <!--synchronize button-->
     <Button
         android:id="@+id/synchButton"
         android:layout_width="wrap_content"
@@ -43,6 +46,7 @@
         app:layout_constraintVertical_bias="1.0"
         android:onClick="synchBtn"/>
 
+    <!--play button-->
     <Button
         android:id="@+id/playButton"
         android:layout_width="wrap_content"
@@ -57,6 +61,7 @@
         app:layout_constraintVertical_bias="0.498"
         android:onClick="playBtn"/>
 
+    <!--search button-->
     <Button
         android:id="@+id/searchButton"
         android:layout_width="wrap_content"

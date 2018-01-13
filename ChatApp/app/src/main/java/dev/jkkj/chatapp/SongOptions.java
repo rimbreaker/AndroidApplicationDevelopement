@@ -35,28 +35,36 @@ public class SongOptions extends AppCompatActivity {
     MediaPlayer mediaPlayer;
     long songId;
 
+    //Creating the View
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.song_optioins);
         Intent intent = getIntent();
 
+        //assigning all buttons to the layout
         synchButton=findViewById(R.id.synchButton);
         playButton=findViewById(R.id.playButton);
         searchButton=findViewById(R.id.searchButton);
+        //making play button invisible
         playButton.setVisibility(View.INVISIBLE);
 
+        //getting the messages from the main view
         song = intent.getStringExtra(MainActivity.SONG_MESSAGE);
         String sender = intent.getStringExtra(MainActivity.SENDER_MESSAGE);
         String user=intent.getStringExtra(MainActivity.USER_MESSAGE);
 
+        //sending the song info to the view
         TextView textView = findViewById(R.id.textView);
         textView.setText(song);
+        //options if user opened a song that was not sent by them
         if(!user.equals(sender)){
             playButton.setBackgroundColor(Color.parseColor("red"));
             TextView textView2=findViewById(R.id.textView2);
             textView2.setText(sender);
-        }else {
+        }
+        //options if user has opened a file that was sent by them
+        else {
             getFileId();
             isSynched=true;
             fileExists=true;
@@ -64,8 +72,10 @@ public class SongOptions extends AppCompatActivity {
         }
     }
 
+    //action for "Search For Files" button
     public void searchForFile(View view){
         getFileId();
+        //reacting to having not found the file
         if(!ifCanPlay()){
         fileExists=false;
         searchButton.setBackgroundColor(Color.parseColor("red"));
@@ -73,7 +83,9 @@ public class SongOptions extends AppCompatActivity {
         }
     }
 
+    //checking whether the file is present on a device and whether the device is synchronized
     public boolean ifCanPlay() {
+        //if both booleans say "true" then display the "Play" button
         if(isSynched && fileExists){
             playButton.setVisibility(View.VISIBLE);
             playButton.setBackgroundColor(Color.parseColor("green"));
@@ -84,20 +96,28 @@ public class SongOptions extends AppCompatActivity {
         return false;
     }
 
+    //action for "Synchronize" button
     public void synchBtn(View view){
+        //I don't have any action for this yet
         isSynched=false;
         synchButton.setBackgroundColor(Color.parseColor("red"));
         Toast.makeText(this,"Cannot synchronize",Toast.LENGTH_SHORT).show();
     }
 
+    //action for "Play" button
     public void playBtn(View view) throws IOException {
-        FirebaseDatabase.getInstance().getReference().push().setValue(new ChatMessage(song, "PLAY"));
 
+        //sending message to the Firebase with "PLAY" in front of the user, so that it can be interpreted differently by the app
+        FirebaseDatabase.getInstance().getReference().push().setValue(new ChatMessage(song, "PLAY" + FirebaseAuth.getInstance().getCurrentUser().getEmail()));
+
+        //stopping if music is already playing
         if(mediaPlayer != null){
             mediaPlayer.reset();
             mediaPlayer.release();
             mediaPlayer=null;
         }
+        //setting up the MediaPlayer
+        else{
         Uri contentUri = ContentUris.withAppendedId(
                 android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
 
@@ -105,16 +125,19 @@ public class SongOptions extends AppCompatActivity {
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mediaPlayer.setDataSource(getApplicationContext(), contentUri);
         mediaPlayer.prepare();
-        mediaPlayer.start();
+        mediaPlayer.start();}
     }
 
+    //destroying MediaPlayer on closing the View
     @Override
     public void onDestroy() {
         if (mediaPlayer != null) mediaPlayer.release();
         super.onDestroy();
     }
 
+    //searching through the device's files; setting File ID for the MediaPlayer
     public void getFileId(){
+        //searching through the device basically just like in MusicSelector.class
         ContentResolver contentResolver = getContentResolver();
         Uri songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         Cursor songCursor = contentResolver.query(songUri, null,null,null,null);
@@ -126,6 +149,7 @@ public class SongOptions extends AppCompatActivity {
             do {
                 String currentTitle = songCursor.getString(songTitle);
                 String currentArtist = songCursor.getString(songArtist);
+                //reacting to having found the file
                 if(song.equals(currentTitle +"\n" + currentArtist));
                 {fileExists=true;
                     searchButton.setBackgroundColor(Color.parseColor("green"));
