@@ -120,6 +120,7 @@ public class MusicSelector extends AppCompatActivity{
                 String currentTitle = songCursor.getString(songTitle);
                 String currentArtist = songCursor.getString(songArtist);
                 arrayList.add(currentTitle + "\n" + currentArtist );
+
             }while(songCursor.moveToNext());
         }
         //populating the array that is later used for search engine

@@ -41,13 +41,14 @@ public class SongOptions extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.song_optioins);
         Intent intent = getIntent();
+        songId=0;
 
         //assigning all buttons to the layout
         synchButton=findViewById(R.id.synchButton);
         playButton=findViewById(R.id.playButton);
         searchButton=findViewById(R.id.searchButton);
         //making play button invisible
-        playButton.setVisibility(View.INVISIBLE);
+        //playButton.setVisibility(View.INVISIBLE);
 
         //getting the messages from the main view
         song = intent.getStringExtra(MainActivity.SONG_MESSAGE);
@@ -76,7 +77,7 @@ public class SongOptions extends AppCompatActivity {
     public void searchForFile(View view){
         getFileId();
         //reacting to having not found the file
-        if(!ifCanPlay()){
+        if(songId==0){
         fileExists=false;
         searchButton.setBackgroundColor(Color.parseColor("red"));
         Toast.makeText(this,"File Not Found",Toast.LENGTH_SHORT).show();
@@ -93,7 +94,7 @@ public class SongOptions extends AppCompatActivity {
             synchButton.setVisibility(View.INVISIBLE);
             return true;
         }
-        return false;
+        return true;
     }
 
     //action for "Synchronize" button
@@ -107,8 +108,10 @@ public class SongOptions extends AppCompatActivity {
     //action for "Play" button
     public void playBtn(View view) throws IOException {
 
+
         //sending message to the Firebase with "PLAY" in front of the user, so that it can be interpreted differently by the app
-        FirebaseDatabase.getInstance().getReference().push().setValue(new ChatMessage(song, "PLAY" + FirebaseAuth.getInstance().getCurrentUser().getEmail()));
+        //FirebaseDatabase.getInstance().getReference().push().setValue(new ChatMessage(song, "PLAY" + FirebaseAuth.getInstance().getCurrentUser().getEmail()));
+
 
         //stopping if music is already playing
         if(mediaPlayer != null){
@@ -150,14 +153,16 @@ public class SongOptions extends AppCompatActivity {
                 String currentTitle = songCursor.getString(songTitle);
                 String currentArtist = songCursor.getString(songArtist);
                 //reacting to having found the file
-                if(song.equals(currentTitle +"\n" + currentArtist));
+                if(song.equals(currentTitle +"\n" + currentArtist))
                 {fileExists=true;
                     searchButton.setBackgroundColor(Color.parseColor("green"));
                     Toast.makeText(this,"File Found",Toast.LENGTH_SHORT).show();
                     ifCanPlay();
+                    //songCursor.moveToPrevious();
                     int idColumn = songCursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID);
                     songId = songCursor.getLong(idColumn);
-                    return;}
+                    return;
+                    }
             }while(songCursor.moveToNext());
         }
     }
