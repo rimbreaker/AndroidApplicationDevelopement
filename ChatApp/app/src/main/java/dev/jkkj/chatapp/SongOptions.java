@@ -9,6 +9,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -29,6 +30,7 @@ public class SongOptions extends AppCompatActivity {
     private boolean isSynched = false;
     private boolean fileExists = false;
     String song;
+    String starter;
     Button searchButton;
     Button playButton;
     Button synchButton;
@@ -48,19 +50,25 @@ public class SongOptions extends AppCompatActivity {
         playButton=findViewById(R.id.playButton);
         searchButton=findViewById(R.id.searchButton);
         //making play button invisible
-        //playButton.setVisibility(View.INVISIBLE);
+        playButton.setVisibility(View.INVISIBLE);
 
         //getting the messages from the main view
         song = intent.getStringExtra(MainActivity.SONG_MESSAGE);
         String sender = intent.getStringExtra(MainActivity.SENDER_MESSAGE);
         String user=intent.getStringExtra(MainActivity.USER_MESSAGE);
+        starter=intent.getStringExtra(MainActivity.START_MESSAGE);
 
+        if(starter.equals("1"))
+        {
+            searchButton.performClick();
+            if(fileExists)
+            playButton.performClick();
+        }
         //sending the song info to the view
         TextView textView = findViewById(R.id.textView);
         textView.setText(song);
         //options if user opened a song that was not sent by them
         if(!user.equals(sender)){
-            playButton.setBackgroundColor(Color.parseColor("red"));
             TextView textView2=findViewById(R.id.textView2);
             textView2.setText(sender);
         }
@@ -110,17 +118,26 @@ public class SongOptions extends AppCompatActivity {
 
 
         //sending message to the Firebase with "PLAY" in front of the user, so that it can be interpreted differently by the app
-        //FirebaseDatabase.getInstance().getReference().push().setValue(new ChatMessage(song, "PLAY" + FirebaseAuth.getInstance().getCurrentUser().getEmail()));
+        if(starter.equals("0"))
+            FirebaseDatabase.getInstance().getReference().child("toPlay").setValue(new ChatMessage(song, "PLAY" + FirebaseAuth.getInstance().getCurrentUser().getEmail()));
+
+
+        if(starter.equals("0"))
+            FirebaseDatabase.getInstance().getReference().child("toPlay").removeValue();
 
 
         //stopping if music is already playing
         if(mediaPlayer != null){
+
             mediaPlayer.reset();
             mediaPlayer.release();
             mediaPlayer=null;
+            starter="1";
         }
         //setting up the MediaPlayer
         else{
+          if(starter.equals("0"))
+                SystemClock.sleep(600);
         Uri contentUri = ContentUris.withAppendedId(
                 android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
 
@@ -128,7 +145,10 @@ public class SongOptions extends AppCompatActivity {
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mediaPlayer.setDataSource(getApplicationContext(), contentUri);
         mediaPlayer.prepare();
-        mediaPlayer.start();}
+        mediaPlayer.start();
+        starter="1";
+        }
+
     }
 
     //destroying MediaPlayer on closing the View
@@ -158,9 +178,10 @@ public class SongOptions extends AppCompatActivity {
                     searchButton.setBackgroundColor(Color.parseColor("green"));
                     Toast.makeText(this,"File Found",Toast.LENGTH_SHORT).show();
                     ifCanPlay();
-                    //songCursor.moveToPrevious();
                     int idColumn = songCursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID);
                     songId = songCursor.getLong(idColumn);
+                    playButton.setVisibility(View.VISIBLE);
+                    playButton.setBackgroundColor(Color.parseColor("green"));
                     return;
                     }
             }while(songCursor.moveToNext());

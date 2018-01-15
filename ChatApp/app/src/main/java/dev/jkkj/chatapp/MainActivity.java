@@ -20,7 +20,11 @@ import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -30,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String SONG_MESSAGE = "com.example.AndroidApplicationDevelopement.MESSAGE1";
     public static final String SENDER_MESSAGE = "com.example.AndroidApplicationDevelopement.MESSAGE";
     public static final String USER_MESSAGE = "com.example.AndroidApplicationDevelopement.MESSAGE2";
+    public static final String START_MESSAGE = "com.example.AndroidApplicationDevelopement.MESSAGE3";
     private static int SIGN_IN_REQUEST_CODE = 1;
     private FirebaseListAdapter<ChatMessage> adapter;
     RelativeLayout activity_main;
@@ -112,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
         final ArrayList<String> songs=new ArrayList<>();
         final ArrayList<String> users=new ArrayList<>();
         final ListView listOfMessage=(ListView)findViewById(R.id.list_of_message);
+
         adapter = new FirebaseListAdapter<ChatMessage>(this,ChatMessage.class,R.layout.list_item,FirebaseDatabase.getInstance().getReference())
         {
             @Override
@@ -123,14 +129,11 @@ public class MainActivity extends AppCompatActivity {
                 messageTime=(TextView) v.findViewById(R.id.message_time);
 
                 if(!model.getMessageUser().contains("PLAY")) {
-
                     messageText.setText(model.getMessageText());
                     songs.add(model.getMessageText());
                     users.add(model.getMessageUser());
                     messageUser.setText(model.getMessageUser());
                     messageTime.setText(android.text.format.DateFormat.format("dd-MM-yyyy (HH:mm:ss)", model.getMessageTime()));
-                }else{
-                    Toast.makeText(sth,"YO, PLAY A SONG",Toast.LENGTH_LONG).show();
                 }
             }
         };
@@ -138,17 +141,14 @@ public class MainActivity extends AppCompatActivity {
 
         listOfMessage.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                String[] songsArr=songs.toArray(new String[0]);
-                String[] usersArr=users.toArray(new String[0]);
                 Intent intent =new Intent(sth,SongOptions.class);
-                String song=songsArr[i];
-                String user=usersArr[i];
+                String song=songs.get(i);
+                String user=users.get(i);
                 String currentUser=FirebaseAuth.getInstance().getCurrentUser().getEmail();
 
+                intent.putExtra(START_MESSAGE,"0");
                 intent.putExtra(USER_MESSAGE,currentUser);
                 intent.putExtra(SONG_MESSAGE,song);
                 intent.putExtra(SENDER_MESSAGE,user);
@@ -156,5 +156,41 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        FirebaseDatabase.getInstance().getReference().addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                ChatMessage msg= dataSnapshot.getValue(ChatMessage.class);
+                if(msg.getMessageUser().contains("PLAY")&& !msg.getMessageUser().contains(FirebaseAuth.getInstance().getCurrentUser().getEmail())){
+                    Intent intent =new Intent(sth,SongOptions.class);
+                    String currentUser=FirebaseAuth.getInstance().getCurrentUser().getEmail();
+
+                    intent.putExtra(START_MESSAGE,"1");
+                    intent.putExtra(USER_MESSAGE,currentUser);
+                    intent.putExtra(SONG_MESSAGE,msg.getMessageText());
+                    intent.putExtra(SENDER_MESSAGE,msg.getMessageUser());
+                    startActivity(intent);
+                    }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 }
