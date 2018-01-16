@@ -44,12 +44,14 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseListAdapter<ChatMessage> adapter;
     RelativeLayout activity_main;
     Button synchBtn;
+    boolean refreshNeeded=false;
 
 
     //action for 'Search File' button
     public void searchFile(View view){
         //opening different activity
         Intent intent = new Intent(this, MusicSelector.class);
+        refreshNeeded=true;
         startActivity(intent);
     }
 
@@ -166,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra(USER_MESSAGE,currentUser);
                 intent.putExtra(SONG_MESSAGE,song);
                 intent.putExtra(SENDER_MESSAGE,user);
+
                 startActivity(intent);
             }
         });
@@ -174,8 +177,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 ChatMessage msg= dataSnapshot.getValue(ChatMessage.class);
-                if(!msg.getMessageUser().contains("PLAY")&& !msg.getMessageUser().contains("SYNCH")){
-                    listOfMessage.setAdapter(adapter);
+                if(!msg.getMessageUser().contains("PLAY")&& !msg.getMessageUser().contains("SYNCH")&& refreshNeeded){
+                    finish();
+                    startActivity(getIntent());
                 }
                 if(msg.getMessageUser().contains("PLAY")&& !msg.getMessageUser().contains(FirebaseAuth.getInstance().getCurrentUser().getEmail())){
                     Intent intent =new Intent(MainActivity.this,SongOptions.class);
@@ -191,9 +195,9 @@ public class MainActivity extends AppCompatActivity {
                 if(msg.getMessageUser().contains("SYNCH")&& !msg.getMessageUser().contains(FirebaseAuth.getInstance().getCurrentUser().getEmail())){
                     Toast.makeText(MainActivity.this,"pong",Toast.LENGTH_SHORT).show();
                     FirebaseDatabase.getInstance().getReference().child("Synchronize1").removeValue();
-                    FirebaseDatabase.getInstance().getReference().child("Synchronize2").setValue(new ChatMessage(null, msg.getMessageUser()));
+                    FirebaseDatabase.getInstance().getReference().child("Synchronize2").setValue(new ChatMessage(null, msg.getMessageUser()+"~"));
                 }
-                if(msg.getMessageUser().contains("SYNCH") && msg.getMessageUser().contains(FirebaseAuth.getInstance().getCurrentUser().getEmail())){
+                if(msg.getMessageUser().contains("SYNCH") && msg.getMessageUser().contains(FirebaseAuth.getInstance().getCurrentUser().getEmail()+"~")){
                     difference = System.currentTimeMillis() - startTime;
                     Toast.makeText(MainActivity.this,"Synchronized",Toast.LENGTH_SHORT).show();
                     synchBtn.setBackgroundColor(Color.parseColor("green"));

@@ -23,7 +23,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
-
+import java.util.Date;
 
 
 public class MusicSelector extends AppCompatActivity{
@@ -98,7 +98,9 @@ public class MusicSelector extends AppCompatActivity{
         listView2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                FirebaseDatabase.getInstance().getReference().child((String)arrayList.get(i).replace("\n","-")).setValue(new ChatMessage(arrayList.get(i), FirebaseAuth.getInstance().getCurrentUser().getEmail()));
+                //FirebaseDatabase.getInstance().getReference().child(
+                  //      android.text.format.DateFormat.format("dd-MM-yyyy (HH:mm:ss)", new Date().getTime())+" " + arrayList.get(i).replace("\n","-")).setValue(new ChatMessage(arrayList.get(i), FirebaseAuth.getInstance().getCurrentUser().getEmail()));
+                FirebaseDatabase.getInstance().getReference().child(arrayList.get(i).replace("\n","-")).setValue(new ChatMessage(arrayList.get(i), FirebaseAuth.getInstance().getCurrentUser().getEmail()));
                 finish();
             }
         });

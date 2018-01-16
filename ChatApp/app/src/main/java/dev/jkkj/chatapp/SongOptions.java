@@ -137,7 +137,7 @@ public class SongOptions extends AppCompatActivity {
         //setting up the MediaPlayer
         else{
           if(starter.equals("0"))
-                SystemClock.sleep(Integer.parseInt(delay));
+                SystemClock.sleep(Integer.parseInt(delay)+100);
         Uri contentUri = ContentUris.withAppendedId(
                 android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
 
