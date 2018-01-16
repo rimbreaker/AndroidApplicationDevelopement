@@ -98,7 +98,7 @@ public class MusicSelector extends AppCompatActivity{
         listView2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                FirebaseDatabase.getInstance().getReference().push().setValue(new ChatMessage(arrayList.get(i), FirebaseAuth.getInstance().getCurrentUser().getEmail()));
+                FirebaseDatabase.getInstance().getReference().child((String)arrayList.get(i).replace("\n","-")).setValue(new ChatMessage(arrayList.get(i), FirebaseAuth.getInstance().getCurrentUser().getEmail()));
                 finish();
             }
         });

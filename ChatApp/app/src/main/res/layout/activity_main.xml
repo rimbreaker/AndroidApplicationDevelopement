@@ -17,15 +17,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
 
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="16dp"
+        android:layout_above="@+id/selectFile"
+        android:layout_alignParentEnd="true"
         android:divider="@android:color/transparent"
         android:dividerHeight="16dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        tools:layout_editor_absoluteY="209dp"
 
-        ></ListView>
+        app:layout_constraintLeft_toLeftOf="parent"
+        tools:layout_editor_absoluteY="209dp"></ListView>
 
     <!--button for selecting files-->
     <Button
@@ -37,4 +35,13 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:onClick="searchFile"/>
+    <Button
+        android:id="@+id/synchronize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Synchronize"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:onClick="synchronize" />
 </RelativeLayout>

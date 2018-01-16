@@ -33,7 +33,8 @@ public class SongOptions extends AppCompatActivity {
     String starter;
     Button searchButton;
     Button playButton;
-    Button synchButton;
+    String delay;
+   // Button synchButton;
     MediaPlayer mediaPlayer;
     long songId;
 
@@ -46,7 +47,7 @@ public class SongOptions extends AppCompatActivity {
         songId=0;
 
         //assigning all buttons to the layout
-        synchButton=findViewById(R.id.synchButton);
+        //synchButton=findViewById(R.id.synchButton);
         playButton=findViewById(R.id.playButton);
         searchButton=findViewById(R.id.searchButton);
         //making play button invisible
@@ -57,6 +58,7 @@ public class SongOptions extends AppCompatActivity {
         String sender = intent.getStringExtra(MainActivity.SENDER_MESSAGE);
         String user=intent.getStringExtra(MainActivity.USER_MESSAGE);
         starter=intent.getStringExtra(MainActivity.START_MESSAGE);
+        delay=intent.getStringExtra(MainActivity.DELAY_MESSAGE);
 
         if(starter.equals("1"))
         {
@@ -99,19 +101,17 @@ public class SongOptions extends AppCompatActivity {
             playButton.setVisibility(View.VISIBLE);
             playButton.setBackgroundColor(Color.parseColor("green"));
             searchButton.setVisibility(View.INVISIBLE);
-            synchButton.setVisibility(View.INVISIBLE);
+           // synchButton.setVisibility(View.INVISIBLE);
             return true;
         }
         return true;
     }
 
-    //action for "Synchronize" button
-    public void synchBtn(View view){
-        //I don't have any action for this yet
-        isSynched=false;
-        synchButton.setBackgroundColor(Color.parseColor("red"));
-        Toast.makeText(this,"Cannot synchronize",Toast.LENGTH_SHORT).show();
-    }
+   public void deleteSong(View view){
+       FirebaseDatabase.getInstance().getReference().child(song.replace("\n","-")).removeValue();
+       Toast.makeText(this,"Song deleted",Toast.LENGTH_SHORT).show();
+       finish();
+   }
 
     //action for "Play" button
     public void playBtn(View view) throws IOException {
@@ -137,7 +137,7 @@ public class SongOptions extends AppCompatActivity {
         //setting up the MediaPlayer
         else{
           if(starter.equals("0"))
-                SystemClock.sleep(600);
+                SystemClock.sleep(Integer.parseInt(delay));
         Uri contentUri = ContentUris.withAppendedId(
                 android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
 

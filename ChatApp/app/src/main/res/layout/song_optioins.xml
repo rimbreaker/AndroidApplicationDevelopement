@@ -14,7 +14,7 @@
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="40dp"
         android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/synchButton"
+        app:layout_constraintBottom_toTopOf="@+id/searchButton"
         app:layout_constraintLeft_toLeftOf="parent" />
 
     <!--name of sender-->
@@ -23,28 +23,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:layout_marginStart="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/synchButton"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/playButton"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textView" />
+        app:layout_constraintStart_toEndOf="@+id/textView"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <!--synchronize button-->
-    <Button
-        android:id="@+id/synchButton"
-        android:layout_width="wrap_content"
-        android:layout_height="47dp"
-        android:layout_marginBottom="232dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Synchoronize"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/playButton"
-        app:layout_constraintStart_toEndOf="@+id/searchButton"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"
-        android:onClick="synchBtn"/>
 
     <!--play button-->
     <Button
@@ -53,27 +41,41 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="16dp"
         android:layout_marginStart="8dp"
+        android:onClick="playBtn"
         android:text="Play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/synchButton"
+        app:layout_constraintStart_toEndOf="@+id/searchButton"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.498"
-        android:onClick="playBtn"/>
+        app:layout_constraintVertical_bias="0.498" />
 
     <!--search button-->
     <Button
         android:id="@+id/searchButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:onClick="searchForFile"
         android:text="Search for File"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/synchButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.498" />
+
+    <Button
+        android:id="@+id/Delete"
+        android:layout_width="130dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:onClick="deleteSong"
+        android:text="Delete Song"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.031"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/searchButton" />
 
 </android.support.constraint.ConstraintLayout>
