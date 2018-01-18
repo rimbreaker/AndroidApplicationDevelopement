@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -21,8 +22,12 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
 
 
 public class SongOptions extends AppCompatActivity {
@@ -34,6 +39,7 @@ public class SongOptions extends AppCompatActivity {
     Button searchButton;
     Button playButton;
     String delay;
+    long startTime;
    // Button synchButton;
     MediaPlayer mediaPlayer;
     long songId;
@@ -58,13 +64,13 @@ public class SongOptions extends AppCompatActivity {
         String sender = intent.getStringExtra(MainActivity.SENDER_MESSAGE);
         String user=intent.getStringExtra(MainActivity.USER_MESSAGE);
         starter=intent.getStringExtra(MainActivity.START_MESSAGE);
-        delay=intent.getStringExtra(MainActivity.DELAY_MESSAGE);
+        startTime=Long.parseLong(intent.getStringExtra(MainActivity.DELAY_MESSAGE));
 
         if(starter.equals("1"))
         {
             searchButton.performClick();
             if(fileExists)
-            playButton.performClick();
+             playButton.performClick();
         }
         //sending the song info to the view
         TextView textView = findViewById(R.id.textView);
@@ -91,7 +97,8 @@ public class SongOptions extends AppCompatActivity {
         fileExists=false;
         searchButton.setBackgroundColor(Color.parseColor("red"));
         Toast.makeText(this,"File Not Found",Toast.LENGTH_SHORT).show();
-        }
+        }else Toast.makeText(this,"File Found",Toast.LENGTH_SHORT).show();
+
     }
 
     //checking whether the file is present on a device and whether the device is synchronized
@@ -114,17 +121,19 @@ public class SongOptions extends AppCompatActivity {
    }
 
     //action for "Play" button
-    public void playBtn(View view) throws IOException {
+    public void playBtn(View view) throws IOException, InterruptedException {
+
 
 
         //sending message to the Firebase with "PLAY" in front of the user, so that it can be interpreted differently by the app
+        if(starter.equals("0")) {
+
+            startTime=System.currentTimeMillis()+startTime/4+5000;
+            FirebaseDatabase.getInstance().getReference().child("toPlay").setValue(new ChatMessage(song,"PLAY" + FirebaseAuth.getInstance().getCurrentUser().getEmail()));
+        }
+
         if(starter.equals("0"))
-            FirebaseDatabase.getInstance().getReference().child("toPlay").setValue(new ChatMessage(song, "PLAY" + FirebaseAuth.getInstance().getCurrentUser().getEmail()));
-
-
-        if(starter.equals("0"))
-            FirebaseDatabase.getInstance().getReference().child("toPlay").removeValue();
-
+           FirebaseDatabase.getInstance().getReference().child("toPlay").removeValue();
 
         //stopping if music is already playing
         if(mediaPlayer != null){
@@ -136,8 +145,6 @@ public class SongOptions extends AppCompatActivity {
         }
         //setting up the MediaPlayer
         else{
-          if(starter.equals("0"))
-                SystemClock.sleep(Integer.parseInt(delay)+100);
         Uri contentUri = ContentUris.withAppendedId(
                 android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
 
@@ -145,7 +152,15 @@ public class SongOptions extends AppCompatActivity {
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mediaPlayer.setDataSource(getApplicationContext(), contentUri);
         mediaPlayer.prepare();
-        mediaPlayer.start();
+
+
+            new Thread(new Runnable() {
+                public void run() {
+                    if(System.currentTimeMillis()<startTime)
+                        while(System.currentTimeMillis()!=startTime){}
+                    mediaPlayer.start();
+                }
+            }).start();
         starter="1";
         }
 
@@ -176,7 +191,6 @@ public class SongOptions extends AppCompatActivity {
                 if(song.equals(currentTitle +"\n" + currentArtist))
                 {fileExists=true;
                     searchButton.setBackgroundColor(Color.parseColor("green"));
-                    Toast.makeText(this,"File Found",Toast.LENGTH_SHORT).show();
                     ifCanPlay();
                     int idColumn = songCursor.getColumnIndex(android.provider.MediaStore.Audio.Media._ID);
                     songId = songCursor.getLong(idColumn);

@@ -1,6 +1,5 @@
 package dev.jkkj.chatapp;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
@@ -26,24 +25,34 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+
 
 import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    long startTime=0;
+    //measurement of time difference when ping comes back
     long difference=0;
+    //message for intent about song title etc
     public static final String SONG_MESSAGE = "com.example.AndroidApplicationDevelopement.MESSAGE1";
+    //message for intent regarding song sender
     public static final String SENDER_MESSAGE = "com.example.AndroidApplicationDevelopement.MESSAGE";
+    //message for intent regarding current user
     public static final String USER_MESSAGE = "com.example.AndroidApplicationDevelopement.MESSAGE2";
+    //message for intent regarding which start mode was activated
     public static final String START_MESSAGE = "com.example.AndroidApplicationDevelopement.MESSAGE3";
-    public static final String DELAY_MESSAGE = "com.example.AndroidApplicationDevelopement.MESSAGE4";
+    //message for intent with ping delay info
+    public static final String DELAY_MESSAGE ="com.example.AndroidApplicationDevelopement.MESSAGE4";
+    //request to access email addresses
     private static int SIGN_IN_REQUEST_CODE = 1;
+    //adapter for Firebase
     private FirebaseListAdapter<ChatMessage> adapter;
+    //layout of this activity
     RelativeLayout activity_main;
+    //synchronization button
     Button synchBtn;
+    //info whether the layout must be refreshed on adding a new component to Firebase
     boolean refreshNeeded=false;
 
 
@@ -51,13 +60,16 @@ public class MainActivity extends AppCompatActivity {
     public void searchFile(View view){
         //opening different activity
         Intent intent = new Intent(this, MusicSelector.class);
+        //needs refreshing because outcome of the next layout might add new component to the Firebase
         refreshNeeded=true;
         startActivity(intent);
     }
 
+    //action for 'Synchronize' button
     public void synchronize(View view){
-        startTime=System.currentTimeMillis();
-        FirebaseDatabase.getInstance().getReference().child("Synchronize1").setValue(new ChatMessage(null, "SYNCH" + FirebaseAuth.getInstance().getCurrentUser().getEmail()));
+        //sending to Firebase a message about synchronization request
+
+        FirebaseDatabase.getInstance().getReference().child("Synchronize").setValue(new ChatMessage(null, "SYNCH" + FirebaseAuth.getInstance().getCurrentUser().getEmail()));
     }
 
     //signing out; entirely from tutorial
@@ -109,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         synchBtn=findViewById(R.id.synchronize);
 
+
         activity_main=(RelativeLayout)findViewById(R.id.activity_main);
 
         if(FirebaseAuth.getInstance().getCurrentUser()==null)
@@ -131,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         final ArrayList<String> songs=new ArrayList<>();
         final ArrayList<String> users=new ArrayList<>();
         final ListView listOfMessage=(ListView)findViewById(R.id.list_of_message);
-        //sth=this;
+
 
         adapter = new FirebaseListAdapter<ChatMessage>(this,ChatMessage.class,R.layout.list_item,FirebaseDatabase.getInstance().getReference())
         {
@@ -173,35 +186,37 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
         FirebaseDatabase.getInstance().getReference().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+               {
                 ChatMessage msg= dataSnapshot.getValue(ChatMessage.class);
+                //reacting to a normal song being added to Firebase
                 if(!msg.getMessageUser().contains("PLAY")&& !msg.getMessageUser().contains("SYNCH")&& refreshNeeded){
                     finish();
                     startActivity(getIntent());
                 }
+                //reacting to a 'PLAY' message being added to Firebase
                 if(msg.getMessageUser().contains("PLAY")&& !msg.getMessageUser().contains(FirebaseAuth.getInstance().getCurrentUser().getEmail())){
                     Intent intent =new Intent(MainActivity.this,SongOptions.class);
                     String currentUser=FirebaseAuth.getInstance().getCurrentUser().getEmail();
 
-                    intent.putExtra(DELAY_MESSAGE,Long.toString(difference));
+
+                    intent.putExtra(DELAY_MESSAGE,Long.toString((long)msg.getServerTime()-difference+5000));
                     intent.putExtra(START_MESSAGE,"1");
                     intent.putExtra(USER_MESSAGE,currentUser);
                     intent.putExtra(SONG_MESSAGE,msg.getMessageText());
                     intent.putExtra(SENDER_MESSAGE,msg.getMessageUser());
                     startActivity(intent);
                     }
-                if(msg.getMessageUser().contains("SYNCH")&& !msg.getMessageUser().contains(FirebaseAuth.getInstance().getCurrentUser().getEmail())){
-                    Toast.makeText(MainActivity.this,"pong",Toast.LENGTH_SHORT).show();
-                    FirebaseDatabase.getInstance().getReference().child("Synchronize1").removeValue();
-                    FirebaseDatabase.getInstance().getReference().child("Synchronize2").setValue(new ChatMessage(null, msg.getMessageUser()+"~"));
-                }
-                if(msg.getMessageUser().contains("SYNCH") && msg.getMessageUser().contains(FirebaseAuth.getInstance().getCurrentUser().getEmail()+"~")){
-                    difference = System.currentTimeMillis() - startTime;
-                    Toast.makeText(MainActivity.this,"Synchronized",Toast.LENGTH_SHORT).show();
+                //reacting to synchronization result being added to Firebase
+                if(msg.getMessageUser().contains("SYNCH") && msg.getMessageUser().contains(FirebaseAuth.getInstance().getCurrentUser().getEmail())){
+                    difference=(long)msg.getServerTime()- msg.getMessageTime();
+                    Toast.makeText(MainActivity.this,Long.toString(difference),Toast.LENGTH_LONG).show();
                     synchBtn.setBackgroundColor(Color.parseColor("green"));
-                    FirebaseDatabase.getInstance().getReference().child("Synchronize2").removeValue();
+                    FirebaseDatabase.getInstance().getReference().child("Synchronize").removeValue();
+                }
                 }
             }
 
